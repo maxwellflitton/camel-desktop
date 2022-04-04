@@ -1,11 +1,18 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const isDev = require("electron-is-dev");
+const { channels } = require('../src/shared/constants');
+
 
 function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
+        webPreferences: {
+            nodeIntegration: true,
+            enableRemoteModule: true,
+            contextIsolation: false,
+        },
     });
     mainWindow.loadURL(
         isDev
@@ -17,6 +24,7 @@ function createWindow() {
     }
 }
 
+
 app.whenReady().then(() => {
     createWindow();
     app.on("activate", function () {
@@ -24,6 +32,13 @@ app.whenReady().then(() => {
     });
 });
 
+
 app.on("window-all-closed", function () {
     if (process.platform !== "darwin") app.quit();
+});
+
+
+ipcMain.on(channels.GET_DATA, (event, arg) => {
+    const { product } = arg;
+    console.log(product);
 });
